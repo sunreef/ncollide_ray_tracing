@@ -7,6 +7,8 @@ use ncollide3d::{
 };
 use rand::{thread_rng, Rng};
 
+use std::f32;
+
 use crate::sampler::{Sampler2, UniformSampler2};
 
 pub struct CameraBuilder {
@@ -101,20 +103,21 @@ impl Camera {
                     let ray_direction = ray_target.coords.normalize();
                     let initial_ray = Ray::new(Point3::new(0.0, 0.0, 0.0), ray_direction)
                         .transform_by(&self.position);
-                    let mut found_intersection = false;
+                    let mut min_toi = f32::MAX;
+                    let mut sample_value = [0.0f32,0.0f32,0.0f32];
                     for intersection in world.interferences_with_ray(&initial_ray, collision_group)
                     {
-                        let normal = intersection.1.normal;
-                        samples[x][y].push([
-                            (125.0 + (normal[0] * 125.0)),
-                            (125.0 + (normal[1] * 125.0)),
-                            (125.0 + (normal[2] * 125.0)),
-                        ]);
-                        found_intersection = true;
+                        if intersection.1.toi < min_toi {
+                            let normal = intersection.1.normal;
+                            sample_value = [
+                                (125.0 + (normal[0] * 125.0)),
+                                (125.0 + (normal[1] * 125.0)),
+                                (125.0 + (normal[2] * 125.0)),
+                            ];
+                            min_toi = intersection.1.toi;
+                        }
                     }
-                    if !found_intersection {
-                        samples[x][y].push([0.0, 0.0, 0.0]);
-                    }
+                    samples[x][y].push(sample_value);
                 }
             }
         }
