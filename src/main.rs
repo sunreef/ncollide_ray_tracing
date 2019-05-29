@@ -39,10 +39,7 @@ fn main() {
             }
         }
     }
-
-    println!("{:?}", indices);
     let tri_mesh = TriMesh::new(vertices, indices, None);
-    let segment = Segment::new(Point3::new(-2.0, 1.0, 0.0), Point3::new(2.0, 0.0, 0.0));
 
     let mut world = CollisionWorld::new(0.01f32);
     let cube_transform = Isometry::translation(0.0, 0.0, 0.0);
@@ -65,5 +62,5 @@ fn main() {
         ))
         .resolution(Vector2::new(400, 400))
         .build();
-    camera.compute_samples(&world, &collision_group, 2);
+    camera.compute_samples(&world, &collision_group, 100);
 }

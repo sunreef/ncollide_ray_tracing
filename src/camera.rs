@@ -79,16 +79,15 @@ impl Camera {
         n_samples: u32,
     ) -> Vec<Vec<Point3<f32>>> {
         let mut rng = thread_rng();
-        let samples = Vec::new();
-
+        let mut samples = Vec::new();
         let mut image = RgbImage::new(self.resolution[0] as u32, self.resolution[1] as u32);
-
         let pixel_sampler = UniformSampler2::new(self.pixel_dimensions);
-
-        for _ in 0..n_samples {
-            for x in 0..self.resolution[0] {
-                let x_coord = (x as f32 - self.resolution[0] as f32 / 2.0);
-                for y in 0..self.resolution[1] {
+        for x in 0..self.resolution[0] {
+            samples.push(Vec::new());
+            let x_coord = (x as f32 - self.resolution[0] as f32 / 2.0);
+            for y in 0..self.resolution[1] {
+                samples[x].push(Vec::new());
+                for _ in 0..n_samples {
                     let y_coord = -(y as f32 - self.resolution[1] as f32 / 2.0);
                     let pixel_samples =
                         Point2::new(rng.gen_range(0.0, 1.0), rng.gen_range(0.0, 1.0));
@@ -102,21 +101,41 @@ impl Camera {
                     let ray_direction = ray_target.coords.normalize();
                     let initial_ray = Ray::new(Point3::new(0.0, 0.0, 0.0), ray_direction)
                         .transform_by(&self.position);
+                    let mut found_intersection = false;
                     for intersection in world.interferences_with_ray(&initial_ray, collision_group)
                     {
                         let normal = intersection.1.normal;
-                        image.get_pixel_mut(x as u32, y as u32).data = [
-                            (125.0 + (normal[0] * 125.0)) as u8,
-                            (125.0 + (normal[1] * 125.0)) as u8,
-                            (125.0 + (normal[2] * 125.0)) as u8,
-                        ];
+                        samples[x][y].push([
+                            (125.0 + (normal[0] * 125.0)),
+                            (125.0 + (normal[1] * 125.0)),
+                            (125.0 + (normal[2] * 125.0)),
+                        ]);
+                        found_intersection = true;
+                    }
+                    if !found_intersection {
+                        samples[x][y].push([0.0, 0.0, 0.0]);
                     }
                 }
+            }
+        }
+        for x in 0..self.resolution[0] {
+            for y in 0..self.resolution[1] {
+                let mut average = [0.0, 0.0, 0.0];
+                for s in 0..n_samples {
+                    average[0] += samples[x][y][s as usize][0];
+                    average[1] += samples[x][y][s as usize][1];
+                    average[2] += samples[x][y][s as usize][2];
+                }
+                image.get_pixel_mut(x as u32, y as u32).data = [
+                    (average[0] / n_samples as f32) as u8,
+                    (average[1] / n_samples as f32) as u8,
+                    (average[2] / n_samples as f32) as u8,
+                ];
             }
         }
 
         image.save("./output.png").unwrap();
 
-        samples
+        Vec::new()
     }
 }
