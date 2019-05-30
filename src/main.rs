@@ -1,5 +1,5 @@
 mod camera;
-mod normal_integrator;
+mod integrators;
 mod sampler;
 
 use std::path::Path;
@@ -39,14 +39,14 @@ fn main() {
 
     let ground = Cuboid::new(Vector3::new(0.5, 1.0, 0.5));
 
-    let mut world = CollisionWorld::new(0.01f32);
+    let mut world = CollisionWorld::new(0.0001f32);
     let cube_transform = Isometry::translation(0.0, 0.0, -1.0);
     let collision_group = CollisionGroups::new();
     world.add(
         cube_transform,
         ShapeHandle::new(tri_mesh),
         collision_group,
-        GeometricQueryType::Contacts(0.01, 0.01),
+        GeometricQueryType::Contacts(0.0001, 0.0001),
         (),
     );
     let pedestal_transform = Isometry::translation(0.0, 0.0, -1.8);
@@ -54,7 +54,7 @@ fn main() {
         pedestal_transform,
         ShapeHandle::new(ground),
         collision_group,
-        GeometricQueryType::Contacts(0.01, 0.01),
+        GeometricQueryType::Contacts(0.0001, 0.0001),
         (),
     );
     world.perform_broad_phase();
@@ -69,5 +69,5 @@ fn main() {
         .screen_dimensions(Vector2::new(0.8, 0.8))
         .resolution(Vector2::new(800, 800))
         .build();
-    camera.compute_samples(&world, &collision_group, 200);
+    camera.compute_samples(&world, &collision_group, 1024);
 }

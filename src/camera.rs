@@ -12,7 +12,7 @@ use std::f32;
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
-use crate::normal_integrator::NormalIntegrator;
+use crate::integrators::AOIntegrator;
 use crate::sampler::UniformSampler2;
 
 pub struct CameraBuilder {
@@ -84,27 +84,22 @@ impl Camera {
         collision_group: &CollisionGroups,
         n_samples: u32,
     ) -> Vec<Vec<Point3<f32>>> {
-        let mut rng = Arc::new(Mutex::new(SmallRng::from_seed([0u8; 16])));
         let mut image = RgbImage::new(self.resolution[0] as u32, self.resolution[1] as u32);
-        let integrator = NormalIntegrator;
+        let integrator = AOIntegrator::new(5.0);
         let pixel_sampler = UniformSampler2::new(self.pixel_dimensions);
         let start_time = Instant::now();
         let samples = (0..self.resolution[0])
             .into_par_iter()
             .map(|x| {
+                let mut rng = thread_rng();
                 let mut row: Vec<Point3<f32>> = Vec::new();
                 row.resize(self.resolution[1], Point3::new(0.0, 0.0, 0.0));
                 for y in 0..self.resolution[1] {
                     for s in 0..n_samples {
                         let x_coord = (x as f32 - self.resolution[0] as f32 / 2.0);
                         let y_coord = -(y as f32 - self.resolution[1] as f32 / 2.0);
-                        let pixel_samples = {
-                            let mut rng_borrow = rng.lock().unwrap();
-                            Point2::new(
-                                rng_borrow.gen_range(0.0, 1.0),
-                                rng_borrow.gen_range(0.0, 1.0),
-                            )
-                        };
+                        let pixel_samples =
+                            Point2::new(rng.gen_range(0.0, 1.0), rng.gen_range(0.0, 1.0));
                         let pixel_position = pixel_sampler.sample(&pixel_samples);
                         let ray_target = Point3::new(
                             x_coord * self.pixel_dimensions[0] + pixel_position[0],
@@ -114,8 +109,8 @@ impl Camera {
                         let ray_direction = ray_target.coords.normalize();
                         let initial_ray = Ray::new(Point3::new(0.0, 0.0, 0.0), ray_direction)
                             .transform_by(&self.position);
-                        let sample_value = integrator.launch_ray(&initial_ray, world);
-                        row[y] = (row[y] * s as f32+ sample_value.coords) / (s + 1) as f32;
+                        let sample_value = integrator.launch_ray(&initial_ray, world, &mut rng);
+                        row[y] = (row[y] * s as f32 + sample_value.coords) / (s + 1) as f32;
                     }
                 }
                 row
@@ -124,11 +119,8 @@ impl Camera {
         for x in 0..self.resolution[0] {
             for y in 0..self.resolution[1] {
                 let value = samples[x][y];
-                image.get_pixel_mut(x as u32, y as u32).data = [
-                    value[0] as u8,
-                    value[1] as u8,
-                    value[2] as u8,
-                ];
+                image.get_pixel_mut(x as u32, y as u32).data =
+                    [value[0] as u8, value[1] as u8, value[2] as u8];
             }
         }
         image.save("./output.png").unwrap();

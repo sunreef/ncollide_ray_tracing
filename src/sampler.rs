@@ -20,16 +20,27 @@ pub struct HemisphereSampler;
 
 impl HemisphereSampler {
     pub fn sample(&self, input: &Point2<f32>, normal: Vector3<f32>) -> Vector3<f32> {
-        let theta_n = normal[2].asin();
-        let phi_n = normal[1].atan2(normal[0]);
-
         let phi = input[0] * 2.0 * PI;
-        let theta = (1.0 - input[1]).acos();
+        let theta = input[1].acos();
 
-        let cos_theta = (theta + theta_n).cos();
-        let sin_theta = (theta + theta_n).sin();
-        let cos_phi = (phi + phi_n).cos();
-        let sin_phi = (phi + phi_n).sin();
-        Vector3::new(cos_theta * cos_phi, cos_theta * sin_phi, sin_theta)
+        let b3 = normal;
+        let cross_dir = if b3[0] < 0.5 {
+            Vector3::new(1.0,0.0,0.0)
+        }
+        else {
+            Vector3::new(0.0,1.0,0.0)
+        };
+        let b1 = b3.cross(&cross_dir).normalize();
+        let b2 = b3.cross(&b1);
+//        println!("{}, {}, {}, {}", theta_n, phi_n, theta, phi);
+
+        let cos_theta = theta.cos();
+        let sin_theta = theta.sin();
+        let cos_phi = phi.cos();
+        let sin_phi = phi.sin();
+        let x = sin_theta * cos_phi;
+        let y = sin_theta * sin_phi;
+        let z = cos_theta;
+        x * b1 + y * b2 + z * b3
     }
 }

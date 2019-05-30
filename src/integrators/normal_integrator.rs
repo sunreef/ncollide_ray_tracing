@@ -3,12 +3,18 @@ use ncollide3d::{
     query::Ray,
     world::{CollisionGroups, CollisionWorld},
 };
+use rand::Rng;
 use std::f32;
 
 pub struct NormalIntegrator;
 
 impl NormalIntegrator {
-    pub fn launch_ray(&self, ray: &Ray<f32>, world: &CollisionWorld<f32, ()>) -> Point3<f32> {
+    pub fn launch_ray<R: Rng>(
+        &self,
+        ray: &Ray<f32>,
+        world: &CollisionWorld<f32, ()>,
+        rng: &mut R,
+    ) -> Point3<f32> {
         let mut min_toi = f32::MAX;
         let mut sample_value = Point3::new(0.0, 0.0, 0.0);
         for intersection in world.interferences_with_ray(&ray, &CollisionGroups::new()) {
