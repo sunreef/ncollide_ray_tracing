@@ -1,10 +1,11 @@
 mod camera;
+mod normal_integrator;
 mod sampler;
 
 use std::path::Path;
 use std::sync::Arc;
 
-use nalgebra::{Unit, Point3, Vector2, Vector3};
+use nalgebra::{Point3, Unit, Vector2, Vector3};
 use ncollide3d::{
     math::Isometry,
     query::Ray,
@@ -19,16 +20,11 @@ fn main() {
     let obj_path = Path::new("./assets/deer.obj");
 
     let mesh = Obj::<SimplePolygon>::load(obj_path).unwrap();
-
     let vertices = mesh
         .position
         .iter()
         .map(|p| Point3::from_slice(p))
         .collect::<Vec<_>>();
-    //let normals = mesh
-    //.normal
-    //.iter()
-    //.map(|p| Vector3::from_column_slice(p))
 
     let mut indices = Vec::new();
     for object in mesh.objects {
@@ -41,7 +37,7 @@ fn main() {
     }
     let tri_mesh = TriMesh::new(vertices, indices, None);
 
-    let ground = Cuboid::new(Vector3::new(0.5,1.0,0.5));
+    let ground = Cuboid::new(Vector3::new(0.5, 1.0, 0.5));
 
     let mut world = CollisionWorld::new(0.01f32);
     let cube_transform = Isometry::translation(0.0, 0.0, -1.0);
@@ -70,7 +66,7 @@ fn main() {
             &Point3::new(0.0, 0.0, -0.5),
             &Vector3::new(0.0, 0.0, 1.0),
         ))
-        .screen_dimensions(Vector2::new(0.8,0.8))
+        .screen_dimensions(Vector2::new(0.8, 0.8))
         .resolution(Vector2::new(800, 800))
         .build();
     camera.compute_samples(&world, &collision_group, 200);

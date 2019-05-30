@@ -5,11 +5,15 @@ use ncollide3d::{
     query::Ray,
     world::{CollisionGroups, CollisionWorld},
 };
-use rand::{thread_rng, Rng};
+use rand::{prelude::*, rngs::SmallRng, thread_rng, Rng};
+use rayon::{iter::ParallelIterator, prelude::*};
 
 use std::f32;
+use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
-use crate::sampler::{Sampler2, UniformSampler2};
+use crate::normal_integrator::NormalIntegrator;
+use crate::sampler::UniformSampler2;
 
 pub struct CameraBuilder {
     position: Isometry<f32>,
@@ -80,64 +84,60 @@ impl Camera {
         collision_group: &CollisionGroups,
         n_samples: u32,
     ) -> Vec<Vec<Point3<f32>>> {
-        let mut rng = thread_rng();
-        let mut samples = Vec::new();
+        let mut rng = Arc::new(Mutex::new(SmallRng::from_seed([0u8; 16])));
         let mut image = RgbImage::new(self.resolution[0] as u32, self.resolution[1] as u32);
+        let integrator = NormalIntegrator;
         let pixel_sampler = UniformSampler2::new(self.pixel_dimensions);
-        for x in 0..self.resolution[0] {
-            samples.push(Vec::new());
-            let x_coord = (x as f32 - self.resolution[0] as f32 / 2.0);
-            for y in 0..self.resolution[1] {
-                samples[x].push(Vec::new());
-                for _ in 0..n_samples {
-                    let y_coord = -(y as f32 - self.resolution[1] as f32 / 2.0);
-                    let pixel_samples =
-                        Point2::new(rng.gen_range(0.0, 1.0), rng.gen_range(0.0, 1.0));
-                    let pixel_position = pixel_sampler.sample(&pixel_samples);
-
-                    let ray_target = Point3::new(
-                        x_coord * self.pixel_dimensions[0] + pixel_position[0],
-                        y_coord * self.pixel_dimensions[1] + pixel_position[1],
-                        self.focal_length,
-                    );
-                    let ray_direction = ray_target.coords.normalize();
-                    let initial_ray = Ray::new(Point3::new(0.0, 0.0, 0.0), ray_direction)
-                        .transform_by(&self.position);
-                    let mut min_toi = f32::MAX;
-                    let mut sample_value = [0.0f32,0.0f32,0.0f32];
-                    for intersection in world.interferences_with_ray(&initial_ray, collision_group)
-                    {
-                        if intersection.1.toi < min_toi {
-                            let normal = intersection.1.normal;
-                            sample_value = [
-                                (125.0 + (normal[0] * 125.0)),
-                                (125.0 + (normal[1] * 125.0)),
-                                (125.0 + (normal[2] * 125.0)),
-                            ];
-                            min_toi = intersection.1.toi;
-                        }
+        let start_time = Instant::now();
+        let samples = (0..self.resolution[0])
+            .into_par_iter()
+            .map(|x| {
+                let mut row: Vec<Point3<f32>> = Vec::new();
+                row.resize(self.resolution[1], Point3::new(0.0, 0.0, 0.0));
+                for y in 0..self.resolution[1] {
+                    for s in 0..n_samples {
+                        let x_coord = (x as f32 - self.resolution[0] as f32 / 2.0);
+                        let y_coord = -(y as f32 - self.resolution[1] as f32 / 2.0);
+                        let pixel_samples = {
+                            let mut rng_borrow = rng.lock().unwrap();
+                            Point2::new(
+                                rng_borrow.gen_range(0.0, 1.0),
+                                rng_borrow.gen_range(0.0, 1.0),
+                            )
+                        };
+                        let pixel_position = pixel_sampler.sample(&pixel_samples);
+                        let ray_target = Point3::new(
+                            x_coord * self.pixel_dimensions[0] + pixel_position[0],
+                            y_coord * self.pixel_dimensions[1] + pixel_position[1],
+                            self.focal_length,
+                        );
+                        let ray_direction = ray_target.coords.normalize();
+                        let initial_ray = Ray::new(Point3::new(0.0, 0.0, 0.0), ray_direction)
+                            .transform_by(&self.position);
+                        let sample_value = integrator.launch_ray(&initial_ray, world);
+                        row[y] = (row[y] * s as f32+ sample_value.coords) / (s + 1) as f32;
                     }
-                    samples[x][y].push(sample_value);
                 }
-            }
-        }
+                row
+            })
+            .collect::<Vec<_>>();
         for x in 0..self.resolution[0] {
             for y in 0..self.resolution[1] {
-                let mut average = [0.0, 0.0, 0.0];
-                for s in 0..n_samples {
-                    average[0] += samples[x][y][s as usize][0];
-                    average[1] += samples[x][y][s as usize][1];
-                    average[2] += samples[x][y][s as usize][2];
-                }
+                let value = samples[x][y];
                 image.get_pixel_mut(x as u32, y as u32).data = [
-                    (average[0] / n_samples as f32) as u8,
-                    (average[1] / n_samples as f32) as u8,
-                    (average[2] / n_samples as f32) as u8,
+                    value[0] as u8,
+                    value[1] as u8,
+                    value[2] as u8,
                 ];
             }
         }
-
         image.save("./output.png").unwrap();
+        let end_time = Instant::now() - start_time;
+
+        println!(
+            "Total time: {} seconds",
+            end_time.as_millis() as f32 / 1000.0
+        );
 
         Vec::new()
     }
