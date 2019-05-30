@@ -14,6 +14,8 @@ use std::time::Instant;
 
 use crate::integrators::AOIntegrator;
 use crate::sampler::UniformSampler2;
+use crate::scene::Scene;
+use crate::object::ObjectData;
 
 pub struct CameraBuilder {
     position: Isometry<f32>,
@@ -80,8 +82,7 @@ impl CameraBuilder {
 impl Camera {
     pub fn compute_samples(
         &self,
-        world: &CollisionWorld<f32, ()>,
-        collision_group: &CollisionGroups,
+        scene: &Scene,
         n_samples: u32,
     ) -> Vec<Vec<Point3<f32>>> {
         let mut image = RgbImage::new(self.resolution[0] as u32, self.resolution[1] as u32);
@@ -109,7 +110,7 @@ impl Camera {
                         let ray_direction = ray_target.coords.normalize();
                         let initial_ray = Ray::new(Point3::new(0.0, 0.0, 0.0), ray_direction)
                             .transform_by(&self.position);
-                        let sample_value = integrator.launch_ray(&initial_ray, world, &mut rng);
+                        let sample_value = integrator.launch_ray(&initial_ray, scene, &mut rng);
                         row[y] = (row[y] * s as f32 + sample_value.coords) / (s + 1) as f32;
                     }
                 }
@@ -120,7 +121,7 @@ impl Camera {
             for y in 0..self.resolution[1] {
                 let value = samples[x][y];
                 image.get_pixel_mut(x as u32, y as u32).data =
-                    [value[0] as u8, value[1] as u8, value[2] as u8];
+                    [(255.0 * value[0]) as u8, (255.0 * value[1]) as u8, (255.0 * value[2]) as u8];
             }
         }
         image.save("./output.png").unwrap();

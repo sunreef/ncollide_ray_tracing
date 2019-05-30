@@ -8,6 +8,8 @@ use rand::Rng;
 use std::f32;
 
 use crate::sampler::HemisphereSampler;
+use crate::scene::Scene;
+use crate::object::ObjectData;
 
 pub struct AOIntegrator {
     range: f32,
@@ -21,15 +23,16 @@ impl AOIntegrator {
     pub fn launch_ray<R: Rng>(
         &self,
         ray: &Ray<f32>,
-        world: &CollisionWorld<f32, ()>,
+        scene: &Scene,
         rng: &mut R,
     ) -> Point3<f32> {
         let mut min_toi = f32::MAX;
         let mut sample_value = Point3::new(0.0, 0.0, 0.0);
         let mut min_intersection =
             RayIntersection::new(0.0, Vector3::new(0.0, 0.0, 0.0), FeatureId::Unknown);
+        let mut min_data = &ObjectData::default();
         let mut found_intersection = false;
-        for intersection in world.interferences_with_ray(&ray, &CollisionGroups::new()) {
+        for intersection in scene.collision_world.interferences_with_ray(&ray, &CollisionGroups::new()) {
             found_intersection = true;
             if intersection.1.toi < min_toi {
                 let normal = intersection.1.normal;
@@ -40,6 +43,7 @@ impl AOIntegrator {
                 );
                 min_toi = intersection.1.toi;
                 min_intersection = intersection.1;
+                min_data = intersection.0.data();
             }
         }
         if !found_intersection {
@@ -54,7 +58,7 @@ impl AOIntegrator {
         let new_ray = Ray::new(new_ray_origin, new_ray_direction);
 
         let mut min_toi = f32::MAX;
-        for intersection in world.interferences_with_ray(&new_ray, &CollisionGroups::new()) {
+        for intersection in scene.collision_world.interferences_with_ray(&new_ray, &CollisionGroups::new()) {
             if intersection.1.toi < min_toi {
                 min_toi = intersection.1.toi;
             }
@@ -63,7 +67,7 @@ impl AOIntegrator {
             Point3::new(0.0,0.0,0.0)
         }
         else {
-            Point3::new(254.0,254.0,254.0)
+            min_data.albedo.as_ref().unwrap().clone()
         }
     }
 }
