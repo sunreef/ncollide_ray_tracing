@@ -1,18 +1,16 @@
 mod camera;
 mod integrators;
+mod math;
+mod object;
 mod sampler;
 mod scene;
-mod object;
 mod shaders;
 
 use std::path::Path;
 use std::sync::Arc;
 
 use nalgebra::{Point3, Unit, Vector2, Vector3};
-use ncollide3d::{
-    math::Isometry,
-};
-
+use ncollide3d::math::Isometry;
 
 use crate::camera::{Camera, CameraBuilder};
 use crate::scene::Scene;

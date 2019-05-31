@@ -13,9 +13,9 @@ use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 use crate::integrators::AOIntegrator;
+use crate::object::ObjectData;
 use crate::sampler::UniformSampler2;
 use crate::scene::Scene;
-use crate::object::ObjectData;
 
 pub struct CameraBuilder {
     position: Isometry<f32>,
@@ -80,13 +80,9 @@ impl CameraBuilder {
 }
 
 impl Camera {
-    pub fn compute_samples(
-        &self,
-        scene: &Scene,
-        n_samples: u32,
-    ) -> Vec<Vec<Point3<f32>>> {
+    pub fn compute_samples(&self, scene: &Scene, n_samples: u32) -> Vec<Vec<Point3<f32>>> {
         let mut image = RgbImage::new(self.resolution[0] as u32, self.resolution[1] as u32);
-        let integrator = AOIntegrator::new(5.0);
+        let integrator = AOIntegrator::new(0.5);
         let pixel_sampler = UniformSampler2::new(self.pixel_dimensions);
         let start_time = Instant::now();
         let samples = (0..self.resolution[0])
@@ -120,8 +116,11 @@ impl Camera {
         for x in 0..self.resolution[0] {
             for y in 0..self.resolution[1] {
                 let value = samples[x][y];
-                image.get_pixel_mut(x as u32, y as u32).data =
-                    [(255.0 * value[0]) as u8, (255.0 * value[1]) as u8, (255.0 * value[2]) as u8];
+                image.get_pixel_mut(x as u32, y as u32).data = [
+                    (255.0 * value[0]) as u8,
+                    (255.0 * value[1]) as u8,
+                    (255.0 * value[2]) as u8,
+                ];
             }
         }
         image.save("./output.png").unwrap();
