@@ -51,10 +51,9 @@ impl AOIntegrator {
 
         let sampler = CosineWeightedHemisphereSampler;
         let ray_samples = Point2::new(rng.gen_range(0.0, 1.0), rng.gen_range(0.0, 1.0));
-        let new_ray_origin = ray.point_at(min_intersection.toi - 0.01);
+        let new_ray_origin = ray.point_at(min_intersection.toi - 0.001);
         let (new_ray_direction, new_ray_probability) =
             sampler.sample(&ray_samples, &min_intersection.normal);
-        //        println!("{:?}, {:?}", min_intersection.normal, new_ray_direction);
         let new_ray = Ray::new(new_ray_origin, new_ray_direction);
 
         let mut min_toi = f32::MAX;
@@ -69,7 +68,7 @@ impl AOIntegrator {
         if min_toi < self.range {
             Point3::new(0.0, 0.0, 0.0)
         } else {
-            (1.0 / (2.0 * PI)) * min_data.albedo.as_ref().unwrap().clone() / new_ray_probability
+            (1.0 / (2.0 * PI)) * Point3::new(1.0, 1.0, 1.0) / new_ray_probability
         }
     }
 }

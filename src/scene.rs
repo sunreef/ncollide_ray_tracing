@@ -1,14 +1,15 @@
-use obj::{Obj, SimplePolygon};
+use nalgebra::{Point3, Vector3};
 use ncollide3d::{
     math::Isometry,
+    shape::{Cuboid, ShapeHandle, TriMesh},
     world::{CollisionGroups, CollisionWorld, GeometricQueryType},
-    shape::{ShapeHandle, TriMesh, Cuboid},
 };
-use nalgebra::{Point3, Vector3};
+use obj::{Obj, SimplePolygon};
 
 use std::path::Path;
 
 use crate::object::ObjectData;
+use crate::shaders::lambert::LambertBSDF;
 
 pub struct Scene {
     pub collision_world: CollisionWorld<f32, ObjectData>,
@@ -40,7 +41,7 @@ impl Scene {
         let mut world = CollisionWorld::new(0.0001f32);
         let mesh_transform = Isometry::translation(0.0, 0.0, -1.0);
         let mesh_data = ObjectData {
-            albedo: Some(Point3::new(0.8,0.0,0.0)),
+            bsdf: Some(Box::new(LambertBSDF::new(Vector3::new(0.8, 0.0, 0.0)))),
             ..Default::default()
         };
         world.add(
@@ -52,7 +53,7 @@ impl Scene {
         );
         let pedestal_transform = Isometry::translation(0.0, 0.0, -1.8);
         let pedestal_data = ObjectData {
-            albedo: Some(Point3::new(0.0,0.0,0.8)),
+            bsdf: Some(Box::new(LambertBSDF::new(Vector3::new(0.0, 0.0, 0.8)))),
             ..Default::default()
         };
         world.add(
