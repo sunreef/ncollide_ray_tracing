@@ -6,9 +6,10 @@ use ncollide3d::{
 };
 use rand::Rng;
 use std::f32;
+use std::f32::consts::PI;
 
 use crate::object::ObjectData;
-use crate::sampler::HemisphereSampler;
+use crate::sampler::{CosineWeightedHemisphereSampler, HemisphereSampler};
 use crate::scene::Scene;
 
 pub struct AOIntegrator {
@@ -48,10 +49,11 @@ impl AOIntegrator {
             return Point3::new(0.0, 0.0, 0.0);
         }
 
-        let sampler = HemisphereSampler;
+        let sampler = CosineWeightedHemisphereSampler;
         let ray_samples = Point2::new(rng.gen_range(0.0, 1.0), rng.gen_range(0.0, 1.0));
         let new_ray_origin = ray.point_at(min_intersection.toi - 0.01);
-        let new_ray_direction = sampler.sample(&ray_samples, &min_intersection.normal);
+        let (new_ray_direction, new_ray_probability) =
+            sampler.sample(&ray_samples, &min_intersection.normal);
         //        println!("{:?}, {:?}", min_intersection.normal, new_ray_direction);
         let new_ray = Ray::new(new_ray_origin, new_ray_direction);
 
@@ -67,7 +69,7 @@ impl AOIntegrator {
         if min_toi < self.range {
             Point3::new(0.0, 0.0, 0.0)
         } else {
-            min_data.albedo.as_ref().unwrap().clone()
+            (1.0 / (2.0 * PI)) * min_data.albedo.as_ref().unwrap().clone() / new_ray_probability
         }
     }
 }

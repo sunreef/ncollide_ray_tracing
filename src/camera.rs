@@ -113,17 +113,20 @@ impl Camera {
                 row
             })
             .collect::<Vec<_>>();
+
+        let clamp = |x: f32| 1.0f32.min(0.0f32.max(x));
         for x in 0..self.resolution[0] {
             for y in 0..self.resolution[1] {
                 let value = samples[x][y];
+
                 image.get_pixel_mut(x as u32, y as u32).data = [
-                    (255.0 * value[0]) as u8,
-                    (255.0 * value[1]) as u8,
-                    (255.0 * value[2]) as u8,
+                    (255.0 * clamp(value[0])) as u8,
+                    (255.0 * clamp(value[1])) as u8,
+                    (255.0 * clamp(value[2])) as u8,
                 ];
             }
         }
-        image.save("./output.png").unwrap();
+        image.save("./output_cosine.png").unwrap();
         let end_time = Instant::now() - start_time;
 
         println!(
