@@ -26,5 +26,5 @@ fn main() {
         .screen_dimensions(Vector2::new(0.8, 0.8))
         .resolution(Vector2::new(800, 800))
         .build();
-    camera.compute_samples(&scene, 1000);
+    camera.compute_samples(&scene, 10000);
 }
