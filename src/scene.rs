@@ -1,17 +1,20 @@
-use nalgebra::{Point3, Vector3};
+use nalgebra::{Point3, Unit, Vector2, Vector3};
 use ncollide3d::{
     math::Isometry,
+    pipeline::object::{CollisionGroups, GeometricQueryType},
     shape::{Cuboid, ShapeHandle, TriMesh},
-    world::{CollisionGroups, CollisionWorld, GeometricQueryType},
+    world::CollisionWorld,
 };
 use obj::{Obj, SimplePolygon};
 
 use std::path::Path;
 
+use crate::camera::{Camera, CameraBuilder};
 use crate::object::ObjectData;
 use crate::shaders::lambert::LambertBSDF;
 
 pub struct Scene {
+    pub camera: Camera,
     pub collision_world: CollisionWorld<f32, ObjectData>,
 }
 
@@ -67,7 +70,20 @@ impl Scene {
         world.perform_narrow_phase();
 
         Scene {
+            camera: CameraBuilder::new()
+                .position(Isometry::face_towards(
+                    &Point3::new(4.0, -4.0, 1.5),
+                    &Point3::new(0.0, 0.0, -0.5),
+                    &Vector3::new(0.0, 0.0, 1.0),
+                ))
+                .screen_dimensions(Vector2::new(0.8, 0.8))
+                .resolution(Vector2::new(800, 800))
+                .build(),
             collision_world: world,
         }
+    }
+
+    pub fn capture(&self, n_samples: u32) -> Vec<Vec<Point3<f32>>> {
+        self.camera.compute_samples(&self, n_samples)
     }
 }

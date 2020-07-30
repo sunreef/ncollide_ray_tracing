@@ -1,19 +1,13 @@
-use image::{ImageBuffer, Rgb, RgbImage};
-use nalgebra::{Point2, Point3, Vector2, Vector3};
-use ncollide3d::{
-    math::Isometry,
-    query::Ray,
-    world::{CollisionGroups, CollisionWorld},
-};
-use rand::{prelude::*, rngs::SmallRng, thread_rng, Rng};
+use image::RgbImage;
+use nalgebra::{Point2, Point3, Vector2};
+use ncollide3d::{math::Isometry, query::Ray};
+use rand::{prelude::*, thread_rng, Rng};
 use rayon::{iter::ParallelIterator, prelude::*};
 
 use std::f32;
-use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 use crate::integrators::AOIntegrator;
-use crate::object::ObjectData;
 use crate::sampler::UniformSampler2;
 use crate::scene::Scene;
 
@@ -93,7 +87,7 @@ impl Camera {
                 row.resize(self.resolution[1], Point3::new(0.0, 0.0, 0.0));
                 for y in 0..self.resolution[1] {
                     for s in 0..n_samples {
-                        let x_coord = (x as f32 - self.resolution[0] as f32 / 2.0);
+                        let x_coord = x as f32 - self.resolution[0] as f32 / 2.0;
                         let y_coord = -(y as f32 - self.resolution[1] as f32 / 2.0);
                         let pixel_samples =
                             Point2::new(rng.gen_range(0.0, 1.0), rng.gen_range(0.0, 1.0));
@@ -134,6 +128,6 @@ impl Camera {
             end_time.as_millis() as f32 / 1000.0
         );
 
-        Vec::new()
+        samples
     }
 }
