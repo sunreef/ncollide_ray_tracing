@@ -1,4 +1,3 @@
-use image::RgbImage;
 use nalgebra::{Point2, Point3, Vector2};
 use ncollide3d::{math::Isometry, query::Ray};
 use rand::{prelude::*, thread_rng, Rng};
@@ -75,7 +74,6 @@ impl CameraBuilder {
 
 impl Camera {
     pub fn compute_samples(&self, scene: &Scene, n_samples: u32) -> Vec<Vec<Point3<f32>>> {
-        let mut image = RgbImage::new(self.resolution[0] as u32, self.resolution[1] as u32);
         let integrator = AOIntegrator::new(0.5);
         let pixel_sampler = UniformSampler2::new(self.pixel_dimensions);
         let start_time = Instant::now();
@@ -108,21 +106,7 @@ impl Camera {
             })
             .collect::<Vec<_>>();
 
-        let clamp = |x: f32| 1.0f32.min(0.0f32.max(x));
-        for x in 0..self.resolution[0] {
-            for y in 0..self.resolution[1] {
-                let value = samples[x][y];
-
-                image.get_pixel_mut(x as u32, y as u32).data = [
-                    (255.0 * clamp(value[0])) as u8,
-                    (255.0 * clamp(value[1])) as u8,
-                    (255.0 * clamp(value[2])) as u8,
-                ];
-            }
-        }
-        image.save("./output_cosine.png").unwrap();
         let end_time = Instant::now() - start_time;
-
         println!(
             "Total time: {} seconds",
             end_time.as_millis() as f32 / 1000.0
