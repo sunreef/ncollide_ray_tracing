@@ -10,7 +10,7 @@ impl NormalIntegrator {
         &self,
         ray: &Ray<f32>,
         world: &CollisionWorld<f32, ()>,
-        rng: &mut R,
+        _: &mut R,
     ) -> Point3<f32> {
         let mut min_toi = f32::MAX;
         let mut sample_value = Point3::new(0.0, 0.0, 0.0);
@@ -18,9 +18,9 @@ impl NormalIntegrator {
             if intersection.2.toi < min_toi {
                 let normal = intersection.2.normal;
                 sample_value = Point3::new(
-                    (125.0 + (normal[0] * 125.0)),
-                    (125.0 + (normal[1] * 125.0)),
-                    (125.0 + (normal[2] * 125.0)),
+                    125.0 + (normal[0] * 125.0),
+                    125.0 + (normal[1] * 125.0),
+                    125.0 + (normal[2] * 125.0),
                 );
                 min_toi = intersection.2.toi;
             }

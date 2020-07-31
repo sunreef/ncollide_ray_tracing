@@ -1,7 +1,7 @@
 use nalgebra::{Point2, Vector3};
 use std::f32::consts::FRAC_1_PI;
 
-use crate::sampler::{CosineWeightedHemisphereSampler, HemisphereSampler};
+use crate::sampler::CosineWeightedHemisphereSampler;
 use crate::shaders::{BxDF, BRDF, BSDF};
 
 #[derive(Clone, Debug)]
@@ -16,7 +16,7 @@ impl LambertBRDF {
 }
 
 impl BxDF for LambertBRDF {
-    fn eval(&self, dir1: &Vector3<f32>, dir2: &Vector3<f32>) -> Vector3<f32> {
+    fn eval(&self, _: &Vector3<f32>, _: &Vector3<f32>) -> Vector3<f32> {
         self.albedo * FRAC_1_PI
     }
 

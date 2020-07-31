@@ -6,11 +6,9 @@ use ncollide3d::{
 };
 use rand::Rng;
 use std::f32;
-use std::f32::consts::PI;
 
 use crate::math::vector_traits::{ToGlobal, ToLocal};
 use crate::object::ObjectData;
-use crate::sampler::{CosineWeightedHemisphereSampler, HemisphereSampler};
 use crate::scene::Scene;
 
 pub struct PathTracingIntegrator {}

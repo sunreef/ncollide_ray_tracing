@@ -1,4 +1,4 @@
-use nalgebra::{Point3, Unit, Vector2, Vector3};
+use nalgebra::{Point3, Vector2, Vector3};
 use ncollide3d::{
     math::Isometry,
     pipeline::object::{CollisionGroups, GeometricQueryType},
@@ -90,8 +90,8 @@ impl Scene {
                     &Point3::new(0.0, 0.0, -0.5),
                     &Vector3::new(0.0, 0.0, 1.0),
                 ))
-                .screen_dimensions(Vector2::new(0.8, 0.8))
-                .resolution(Vector2::new(800, 800))
+                .screen_dimensions(Vector2::new(1.6, 0.9))
+                .resolution(Vector2::new(1920, 1080))
                 .build(),
             collision_world: world,
         }

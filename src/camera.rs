@@ -1,6 +1,6 @@
 use nalgebra::{Point2, Point3, Vector2};
 use ncollide3d::{math::Isometry, query::Ray};
-use rand::{prelude::*, thread_rng, Rng};
+use rand::{thread_rng, Rng};
 use rayon::{iter::ParallelIterator, prelude::*};
 
 use std::f32;

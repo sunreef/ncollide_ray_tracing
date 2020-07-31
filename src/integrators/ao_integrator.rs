@@ -8,7 +8,6 @@ use rand::Rng;
 use std::f32;
 use std::f32::consts::PI;
 
-use crate::object::ObjectData;
 use crate::sampler::{CosineWeightedHemisphereSampler, HemisphereSampler};
 use crate::scene::Scene;
 
@@ -23,10 +22,8 @@ impl AOIntegrator {
 
     pub fn launch_ray<R: Rng>(&self, ray: &Ray<f32>, scene: &Scene, rng: &mut R) -> Point3<f32> {
         let mut min_toi = f32::MAX;
-        let mut sample_value = Point3::new(0.0, 0.0, 0.0);
         let mut min_intersection =
             RayIntersection::new(0.0, Vector3::new(0.0, 0.0, 0.0), FeatureId::Unknown);
-        let mut min_data = &ObjectData::default();
         let mut found_intersection = false;
         for intersection in
             scene
@@ -35,15 +32,8 @@ impl AOIntegrator {
         {
             found_intersection = true;
             if intersection.2.toi < min_toi {
-                let normal = intersection.2.normal;
-                sample_value = Point3::new(
-                    125.0 + (normal[0] * 125.0),
-                    125.0 + (normal[1] * 125.0),
-                    125.0 + (normal[2] * 125.0),
-                );
                 min_toi = intersection.2.toi;
                 min_intersection = intersection.2;
-                min_data = intersection.1.data();
             }
         }
         if !found_intersection {
