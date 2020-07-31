@@ -58,20 +58,13 @@ impl AOIntegrator {
             sampler.sample(&ray_samples, &min_intersection.normal);
         let new_ray = Ray::new(new_ray_origin, new_ray_direction);
 
-        let mut min_toi = f32::MAX;
-        for intersection in
-            scene
-                .collision_world
-                .interferences_with_ray(&new_ray, 1.0f32, &CollisionGroups::new())
-        {
-            if intersection.2.toi < min_toi {
-                min_toi = intersection.2.toi;
-            }
+        for intersection in scene.collision_world.interferences_with_ray(
+            &new_ray,
+            self.range,
+            &CollisionGroups::new(),
+        ) {
+            return Point3::new(0.0, 0.0, 0.0);
         }
-        if min_toi < self.range {
-            Point3::new(0.0, 0.0, 0.0)
-        } else {
-            (1.0 / (2.0 * PI)) * Point3::new(1.0, 1.0, 1.0) / new_ray_probability
-        }
+        (1.0 / (2.0 * PI)) * Point3::new(1.0, 1.0, 1.0) / new_ray_probability
     }
 }

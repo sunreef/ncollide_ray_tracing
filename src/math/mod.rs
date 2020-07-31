@@ -1,5 +1,5 @@
-mod vector_traits;
+pub mod vector_traits;
 pub use vector_traits::*;
 
-mod angles;
+pub mod angles;
 pub use angles::*;

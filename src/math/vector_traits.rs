@@ -17,3 +17,25 @@ impl Vector3ToBasis for Vector3<f32> {
         (b1, b2, b3)
     }
 }
+
+pub trait ToLocal: Sized {
+    fn to_local(&self, normal: &Self) -> Self;
+}
+
+impl ToLocal for Vector3<f32> {
+    fn to_local(&self, normal: &Self) -> Self {
+        let (b1, b2, b3) = normal.orthonormal_basis();
+        Vector3::new(self.dot(&b1), self.dot(&b2), self.dot(&b3))
+    }
+}
+
+pub trait ToGlobal: Sized {
+    fn to_global(&self, normal: &Self) -> Self;
+}
+
+impl ToGlobal for Vector3<f32> {
+    fn to_global(&self, normal: &Self) -> Self {
+        let (b1, b2, b3) = normal.orthonormal_basis();
+        self[0] * b1 + self[1] * b2 + self[2] * b3
+    }
+}

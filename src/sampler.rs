@@ -1,6 +1,6 @@
 use nalgebra::{Point2, Vector2, Vector3};
 
-use std::f32::consts::PI;
+use std::f32::consts::{FRAC_1_PI, PI};
 
 use crate::math::angles_to_vector;
 
@@ -24,7 +24,7 @@ impl HemisphereSampler {
     pub fn sample(&self, input: &Point2<f32>, normal: &Vector3<f32>) -> (Vector3<f32>, f32) {
         let phi = input[0] * 2.0 * PI;
         let theta = input[1].acos();
-        (angles_to_vector(phi, theta, normal), 1.0 / (2.0 * PI))
+        (angles_to_vector(phi, theta, normal), 0.5 * FRAC_1_PI)
     }
 }
 
@@ -33,8 +33,8 @@ pub struct CosineWeightedHemisphereSampler;
 impl CosineWeightedHemisphereSampler {
     pub fn sample(&self, input: &Point2<f32>, normal: &Vector3<f32>) -> (Vector3<f32>, f32) {
         let phi = input[0] * 2.0 * PI;
-        let cos_theta = 0.5 * (1.0 - 2.0 * input[1]);
-        let theta = cos_theta.acos();
-        (angles_to_vector(phi, theta, normal), cos_theta / PI)
+        let theta = 0.5 * ((1.0 - 2.0 * input[1]).acos());
+        let cos_theta = theta.cos();
+        (angles_to_vector(phi, theta, normal), cos_theta * FRAC_1_PI)
     }
 }

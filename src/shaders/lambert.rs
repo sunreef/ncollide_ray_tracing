@@ -1,7 +1,7 @@
 use nalgebra::{Point2, Vector3};
 use std::f32::consts::FRAC_1_PI;
 
-use crate::sampler::HemisphereSampler;
+use crate::sampler::{CosineWeightedHemisphereSampler, HemisphereSampler};
 use crate::shaders::{BxDF, BRDF, BSDF};
 
 #[derive(Clone, Debug)]
@@ -16,18 +16,18 @@ impl LambertBRDF {
 }
 
 impl BxDF for LambertBRDF {
-    fn eval(&self, dir1: Vector3<f32>, dir2: Vector3<f32>) -> Vector3<f32> {
+    fn eval(&self, dir1: &Vector3<f32>, dir2: &Vector3<f32>) -> Vector3<f32> {
         self.albedo * FRAC_1_PI
     }
 
     fn sample(
         &self,
-        dir: Vector3<f32>,
+        dir: &Vector3<f32>,
         samples: &Point2<f32>,
     ) -> (Vector3<f32>, Vector3<f32>, f32) {
-        let sampler = HemisphereSampler;
+        let sampler = CosineWeightedHemisphereSampler;
         let (new_vector, probability) = sampler.sample(samples, &Vector3::new(0.0, 0.0, 1.0));
-        let brdf_value = self.eval(dir, new_vector);
+        let brdf_value = self.eval(dir, &new_vector);
         (new_vector, brdf_value, probability)
     }
 }
@@ -50,13 +50,13 @@ impl LambertBSDF {
 }
 
 impl BSDF for LambertBSDF {
-    fn eval(&self, dir1: Vector3<f32>, dir2: Vector3<f32>) -> Vector3<f32> {
+    fn eval(&self, dir1: &Vector3<f32>, dir2: &Vector3<f32>) -> Vector3<f32> {
         self.brdf.eval(dir1, dir2)
     }
 
     fn sample(
         &self,
-        dir: Vector3<f32>,
+        dir: &Vector3<f32>,
         samples: &Point2<f32>,
     ) -> (Vector3<f32>, Vector3<f32>, f32) {
         self.brdf.sample(dir, samples)

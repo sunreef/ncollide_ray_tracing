@@ -6,7 +6,7 @@ use rayon::{iter::ParallelIterator, prelude::*};
 use std::f32;
 use std::time::Instant;
 
-use crate::integrators::AOIntegrator;
+use crate::integrators::{AOIntegrator, PathTracingIntegrator};
 use crate::sampler::UniformSampler2;
 use crate::scene::Scene;
 
@@ -74,7 +74,7 @@ impl CameraBuilder {
 
 impl Camera {
     pub fn compute_samples(&self, scene: &Scene, n_samples: u32) -> Vec<Vec<Point3<f32>>> {
-        let integrator = AOIntegrator::new(0.5);
+        let integrator = PathTracingIntegrator::new();
         let pixel_sampler = UniformSampler2::new(self.pixel_dimensions);
         let start_time = Instant::now();
         let samples = (0..self.resolution[0])
