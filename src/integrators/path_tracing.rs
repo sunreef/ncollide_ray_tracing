@@ -11,16 +11,18 @@ use crate::math::vector_traits::{ToGlobal, ToLocal};
 use crate::object::ObjectData;
 use crate::scene::Scene;
 
-pub struct PathTracingIntegrator {}
+pub struct PathTracingIntegrator {
+    roulette_threshold: f32,
+}
 
 impl PathTracingIntegrator {
     pub fn new() -> Self {
-        PathTracingIntegrator {}
+        PathTracingIntegrator {
+            roulette_threshold: 0.9f32,
+        }
     }
 
     pub fn launch_ray<R: Rng>(&self, ray: &Ray<f32>, scene: &Scene, rng: &mut R) -> Point3<f32> {
-        let roulette_threshold = 0.9f32;
-
         let mut sample_value = Point3::new(0.0, 0.0, 0.0);
         let mut contribution = Vector3::new(1.0f32, 1.0f32, 1.0f32);
         let mut keep_going = true;
@@ -85,11 +87,11 @@ impl PathTracingIntegrator {
                     count_bounces += 1;
 
                     let roulette_sample = rng.gen_range(0.0, 1.0);
-                    if roulette_sample > roulette_threshold {
+                    if roulette_sample > self.roulette_threshold {
                         keep_going = false;
                     } else {
                         keep_going = true;
-                        contribution /= roulette_threshold;
+                        contribution /= self.roulette_threshold;
                     }
                 }
                 None => {

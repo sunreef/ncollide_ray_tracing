@@ -48,7 +48,7 @@ impl AOIntegrator {
             sampler.sample(&ray_samples, &min_intersection.normal);
         let new_ray = Ray::new(new_ray_origin, new_ray_direction);
 
-        for intersection in scene.collision_world.interferences_with_ray(
+        for _ in scene.collision_world.interferences_with_ray(
             &new_ray,
             self.range,
             &CollisionGroups::new(),
