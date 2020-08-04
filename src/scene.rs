@@ -18,8 +18,8 @@ impl Scene {
                     &Point3::new(0.0, 0.0, -0.5),
                     &Vector3::new(0.0, 0.0, 1.0),
                 ))
-                .screen_dimensions(Vector2::new(1.0, 1.0))
-                .resolution(Vector2::new(1000, 1000))
+                .screen_dimensions(Vector2::new(0.8, 0.6))
+                .resolution(Vector2::new(800, 600))
                 .build(),
             collision_world: CollisionWorld::<f32, ObjectData>::new(0.0001f32),
         }
