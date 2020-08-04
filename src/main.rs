@@ -80,7 +80,7 @@ fn add_lights(scene: &mut Scene) {
     let sun_light = Cuboid::new(Vector3::new(1.0, 1.0, 1.0));
     let sun_transform = Isometry::translation(4.0, 8.0, 0.0);
     let sun_data = ObjectData {
-        emission: Some((50.0f32, Point3::new(0.9, 0.8, 0.6))),
+        emission: Some((20.0f32, Point3::new(0.9, 0.7, 0.6))),
         ..Default::default()
     };
     scene
@@ -97,7 +97,7 @@ fn main() {
     add_lights(&mut scene);
 
     scene.perform_collision_phase();
-    let samples = scene.capture(2000u32);
+    let samples = scene.capture(5000u32);
 
     let mut image = RgbImage::new(samples.len() as u32, samples[0].len() as u32);
     let clamp = |x: f32| 1.0f32.min(0.0f32.max(x));

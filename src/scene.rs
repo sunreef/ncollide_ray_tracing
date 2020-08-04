@@ -15,7 +15,7 @@ impl Scene {
             camera: CameraBuilder::new()
                 .position(Isometry::face_towards(
                     &Point3::new(4.0, -4.0, 1.5),
-                    &Point3::new(0.0, 0.0, -0.5),
+                    &Point3::new(-0.5, 0.0, 0.0),
                     &Vector3::new(0.0, 0.0, 1.0),
                 ))
                 .screen_dimensions(Vector2::new(0.8, 0.6))
