@@ -1,12 +1,17 @@
 use nalgebra::{Point3, Vector2, Vector3};
-use ncollide3d::{math::Isometry, shape::Shape, world::CollisionWorld};
+use ncollide3d::{
+    math::Isometry,
+    pipeline::object::{CollisionGroups, GeometricQueryType},
+    shape::Shape,
+    world::CollisionWorld,
+};
 
 use crate::camera::{Camera, CameraBuilder};
-use crate::object::{ObjectData, ShapeBuilder};
+use crate::object::{ObjectData, WorldObjectData};
 
 pub struct Scene {
     pub camera: Camera,
-    pub collision_world: CollisionWorld<f32, ObjectData>,
+    pub collision_world: CollisionWorld<f32, WorldObjectData>,
 }
 
 impl Scene {
@@ -21,12 +26,27 @@ impl Scene {
                 .screen_dimensions(Vector2::new(0.8, 0.6))
                 .resolution(Vector2::new(800, 600))
                 .build(),
-            collision_world: CollisionWorld::<f32, ObjectData>::new(0.0001f32),
+            collision_world: CollisionWorld::<f32, WorldObjectData>::new(0.0001f32),
         }
     }
 
-    pub fn add_shape<S: Shape<f32>>(&mut self, shape: S) -> ShapeBuilder<S> {
-        ShapeBuilder::new(self, shape)
+    pub fn add_object(&mut self, mut data: ObjectData) {
+        let shape = std::mem::take(&mut data.shape);
+        let position = std::mem::take(&mut data.position);
+        let world_data = data.to_world_data();
+
+        match (position, shape) {
+            (Some(pos), Some(s)) => {
+                self.collision_world.add(
+                    pos,
+                    s.get_handle(),
+                    CollisionGroups::new(),
+                    GeometricQueryType::Contacts(0.0001, 0.0001),
+                    world_data,
+                );
+            }
+            _ => (),
+        }
     }
 
     pub fn perform_collision_phase(&mut self) {

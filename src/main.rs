@@ -8,53 +8,38 @@ mod shaders;
 
 use image::RgbImage;
 use nalgebra::{Point3, Vector3};
-use ncollide3d::{math::Isometry, shape::Cuboid, transformation::ToTriMesh};
-use obj::{Obj, SimplePolygon};
-use std::path::Path;
+use ncollide3d::math::Isometry;
 
-use crate::object::shapes::TriMesh;
-use crate::object::{ObjectData, ObjectToShape};
+use crate::object::{shapes::Shape, ObjectData};
 use crate::scene::Scene;
-use crate::shaders::lambert::LambertBSDF;
+use crate::shaders::Shader;
 
 fn add_mesh_to_scene(scene: &mut Scene, obj_path: String) {
-    let trimesh = TriMesh::new(obj_path);
-    let mesh_transform = Isometry::translation(0.0, 0.0, -1.0);
     let mesh_data = ObjectData {
-        bsdf: Some(Box::new(LambertBSDF::new(Vector3::new(0.8, 0.8, 0.8)))),
+        shape: Some(Shape::TriMesh(obj_path)),
+        position: Some(Isometry::translation(0.0, 0.0, -1.0)),
+        bsdf: Some(Shader::Lambert(Vector3::new(0.8, 0.8, 0.8))),
         ..Default::default()
     };
-    scene
-        .add_shape(trimesh.to_shape())
-        .with_transform(mesh_transform)
-        .with_data(mesh_data)
-        .build();
+    scene.add_object(mesh_data);
 }
 
 fn add_lights(scene: &mut Scene) {
-    let left_light = Cuboid::new(Vector3::new(100.0, 0.1, 100.0));
-    let left_transform = Isometry::translation(0.0, 20.0, 0.0);
-    let left_data = ObjectData {
+    let left_light_data = ObjectData {
+        shape: Some(Shape::Cuboid(Vector3::new(100.0, 0.1, 100.0))),
+        position: Some(Isometry::translation(0.0, 20.0, 0.0)),
         emission: Some((1.0f32, Point3::new(0.4, 0.4, 0.8))),
         ..Default::default()
     };
-    scene
-        .add_shape(left_light)
-        .with_transform(left_transform)
-        .with_data(left_data)
-        .build();
+    scene.add_object(left_light_data);
 
-    let sun_light = Cuboid::new(Vector3::new(1.0, 1.0, 1.0));
-    let sun_transform = Isometry::translation(4.0, 8.0, 0.0);
-    let sun_data = ObjectData {
+    let sun_light_data = ObjectData {
+        shape: Some(Shape::Cuboid(Vector3::new(1.0, 1.0, 1.0))),
+        position: Some(Isometry::translation(4.0, 8.0, 0.0)),
         emission: Some((20.0f32, Point3::new(0.9, 0.7, 0.6))),
         ..Default::default()
     };
-    scene
-        .add_shape(sun_light)
-        .with_transform(sun_transform)
-        .with_data(sun_data)
-        .build();
+    scene.add_object(sun_light_data);
 }
 
 fn main() {

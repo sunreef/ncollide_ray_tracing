@@ -8,7 +8,7 @@ use rand::Rng;
 use std::f32;
 
 use crate::math::vector_traits::{ToGlobal, ToLocal};
-use crate::object::ObjectData;
+use crate::object::WorldObjectData;
 use crate::scene::Scene;
 
 pub struct PathTracingIntegrator {
@@ -35,7 +35,7 @@ impl PathTracingIntegrator {
             let mut found_intersection = false;
             let mut min_intersection =
                 RayIntersection::new(0.0, Vector3::new(0.0, 0.0, 0.0), FeatureId::Unknown);
-            let mut min_data = &ObjectData::default();
+            let mut min_data = &WorldObjectData::default();
 
             for intersection in scene.collision_world.interferences_with_ray(
                 &current_ray,

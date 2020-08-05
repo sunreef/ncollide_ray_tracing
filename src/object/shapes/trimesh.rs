@@ -5,7 +5,7 @@ use ncollide3d::shape;
 use obj::{Obj, SimplePolygon};
 use serde::{Deserialize, Serialize};
 
-use crate::object::ObjectToShape;
+use crate::object::shapes::ObjectToShape;
 
 #[derive(Serialize, Deserialize)]
 pub struct TriMesh {

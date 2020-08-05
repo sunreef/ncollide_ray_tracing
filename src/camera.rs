@@ -6,7 +6,7 @@ use rayon::{iter::ParallelIterator, prelude::*};
 use std::f32;
 use std::time::Instant;
 
-use crate::integrators::{AOIntegrator, PathTracingIntegrator};
+use crate::integrators::PathTracingIntegrator;
 use crate::sampler::UniformSampler2;
 use crate::scene::Scene;
 
