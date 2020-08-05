@@ -1,10 +1,11 @@
+use std::f32;
+use std::time::Instant;
+
 use nalgebra::{Point2, Point3, Vector2};
 use ncollide3d::{math::Isometry, query::Ray};
 use rand::{thread_rng, Rng};
 use rayon::{iter::ParallelIterator, prelude::*};
-
-use std::f32;
-use std::time::Instant;
+use serde::{Deserialize, Serialize};
 
 use crate::integrators::PathTracingIntegrator;
 use crate::sampler::UniformSampler2;
@@ -17,12 +18,12 @@ pub struct CameraBuilder {
     resolution: Vector2<usize>,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Camera {
     position: Isometry<f32>,
     focal_length: f32,
     screen_dimensions: Vector2<f32>,
     resolution: Vector2<usize>,
-
     pixel_dimensions: Vector2<f32>,
 }
 
