@@ -21,7 +21,10 @@ fn add_mesh_to_scene(scene: &mut Scene, obj_path: String) {
         bsdf: Some(Shader::Lambert(Vector3::new(0.8, 0.8, 0.8))),
         ..Default::default()
     };
-    scene.add_object(mesh_data);
+    let json_str = serde_json::to_string_pretty(&mesh_data).expect("serialization failed");
+    println!("{}", json_str);
+
+    scene.add_object(serde_json::from_str(&json_str).expect("Deserialization failed"));
 }
 
 fn add_lights(scene: &mut Scene) {

@@ -2,7 +2,6 @@ use nalgebra::{Point3, Vector2, Vector3};
 use ncollide3d::{
     math::Isometry,
     pipeline::object::{CollisionGroups, GeometricQueryType},
-    shape::Shape,
     world::CollisionWorld,
 };
 

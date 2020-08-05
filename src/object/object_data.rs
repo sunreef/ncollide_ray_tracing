@@ -1,5 +1,4 @@
 use nalgebra::{Isometry3, Point3};
-use ncollide3d::shape::ShapeHandle;
 use serde::{Deserialize, Serialize};
 
 use crate::object::shapes::Shape;
