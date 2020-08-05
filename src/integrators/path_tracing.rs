@@ -75,9 +75,8 @@ impl PathTracingIntegrator {
                     let (local_new_dir, bsdf_value, bsdf_probability) =
                         bsdf_function.sample(&local_incident_vector, &bsdf_samples);
                     let global_new_dir = local_new_dir.to_global(&normal).normalize();
-                    //println!("{:?}", global_new_dir.dot(normal));
                     current_ray = Ray::new(
-                        current_ray.point_at(min_toi) + 0.01f32 * normal,
+                        current_ray.point_at(min_toi) + 0.001f32 * normal,
                         global_new_dir,
                     );
 
