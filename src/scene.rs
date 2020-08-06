@@ -4,6 +4,7 @@ use ncollide3d::{
     pipeline::object::{CollisionGroups, GeometricQueryType},
     world::CollisionWorld,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::camera::{Camera, CameraBuilder};
 use crate::object::{ObjectData, WorldObjectData};
@@ -29,6 +30,9 @@ impl Scene {
         }
     }
 
+    pub fn set_camera(&mut self, camera: Camera) {
+        self.camera = camera;
+    }
     pub fn add_object(&mut self, mut data: ObjectData) {
         let shape = std::mem::take(&mut data.shape);
         let position = std::mem::take(&mut data.position);
@@ -55,5 +59,29 @@ impl Scene {
 
     pub fn capture(&self, n_samples: u32) -> Vec<Vec<Point3<f32>>> {
         self.camera.compute_samples(&self, n_samples)
+    }
+}
+
+#[derive(Default, Serialize, Deserialize)]
+pub struct SceneData {
+    pub camera: Option<Camera>,
+    pub objects: Vec<ObjectData>,
+}
+
+impl SceneData {
+    pub fn add_object(&mut self, object: ObjectData) {
+        self.objects.push(object);
+    }
+
+    pub fn to_scene(self) -> Scene {
+        let mut scene = Scene::new();
+        match self.camera {
+            Some(camera) => scene.set_camera(camera),
+            None => (),
+        }
+        for object in self.objects {
+            scene.add_object(object);
+        }
+        scene
     }
 }

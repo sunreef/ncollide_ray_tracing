@@ -7,14 +7,15 @@ mod scene;
 mod shaders;
 
 use image::RgbImage;
-use nalgebra::{Point3, Vector3};
+use nalgebra::{Point3, Vector2, Vector3};
 use ncollide3d::math::Isometry;
 
+use crate::camera::CameraBuilder;
 use crate::object::{shapes::Shape, ObjectData};
-use crate::scene::Scene;
+use crate::scene::{Scene, SceneData};
 use crate::shaders::Shader;
 
-fn add_mesh_to_scene(scene: &mut Scene, obj_path: String) {
+fn add_mesh_to_scene(scene: &mut SceneData, obj_path: String) {
     let mesh_data = ObjectData {
         shape: Some(Shape::TriMesh(obj_path)),
         position: Some(Isometry::translation(0.0, 0.0, -1.0)),
@@ -24,7 +25,7 @@ fn add_mesh_to_scene(scene: &mut Scene, obj_path: String) {
     scene.add_object(mesh_data);
 }
 
-fn add_lights(scene: &mut Scene) {
+fn add_lights(scene: &mut SceneData) {
     let left_light_data = ObjectData {
         shape: Some(Shape::Cuboid(Vector3::new(100.0, 0.1, 100.0))),
         position: Some(Isometry::translation(0.0, 20.0, 0.0)),
@@ -43,10 +44,27 @@ fn add_lights(scene: &mut Scene) {
 }
 
 fn main() {
-    let mut scene = Scene::new();
+    let mut scene_data = SceneData {
+        camera: Some(
+            CameraBuilder::new()
+                .position(Isometry::face_towards(
+                    &Point3::new(4.0, -4.0, 1.5),
+                    &Point3::new(-0.5, 0.0, 0.0),
+                    &Vector3::new(0.0, 0.0, 1.0),
+                ))
+                .screen_dimensions(Vector2::new(0.8, 0.6))
+                .resolution(Vector2::new(800, 600))
+                .build(),
+        ),
+        objects: Vec::new(),
+    };
     let obj_path = "./assets/deer.obj".to_owned();
-    add_mesh_to_scene(&mut scene, obj_path);
-    add_lights(&mut scene);
+    add_mesh_to_scene(&mut scene_data, obj_path);
+    add_lights(&mut scene_data);
+
+    println!("{}", serde_json::to_string_pretty(&scene_data).expect(""));
+
+    let mut scene = scene_data.to_scene();
 
     scene.perform_collision_phase();
     let samples = scene.capture(100u32);
