@@ -4,7 +4,10 @@ use trimesh::*;
 mod cuboid;
 use cuboid::*;
 
-use nalgebra::Vector3;
+mod metaball;
+use metaball::*;
+
+use nalgebra::{Point3, Vector3};
 use ncollide3d::shape::ShapeHandle;
 use serde::{Deserialize, Serialize};
 
@@ -17,6 +20,7 @@ pub trait ObjectToShape {
 pub enum Shape {
     TriMesh(String),
     Cuboid(Vector3<f32>),
+    Metaball(Vec<Point3<f32>>),
 }
 
 impl Shape {
@@ -24,6 +28,7 @@ impl Shape {
         match self {
             Shape::TriMesh(obj_path) => ShapeHandle::new(TriMesh::new(obj_path).to_shape()),
             Shape::Cuboid(dims) => ShapeHandle::new(Cuboid::new(dims).to_shape()),
+            Shape::Metaball(points) => ShapeHandle::new(Metaball::new(points, 1.0f32, 1.0f32)),
         }
     }
 }
