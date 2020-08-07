@@ -18,9 +18,23 @@ impl UniformSampler2 {
     }
 }
 
-pub struct HemisphereSampler;
+pub struct UniformSphereSampler;
 
-impl HemisphereSampler {
+impl UniformSphereSampler {
+    pub fn sample(&self, samples: &Point2<f32>) -> (Vector3<f32>, f32) {
+        let phi = 2.0 * PI * samples[0];
+        let theta = (1.0 - 2.0 * samples[1]).acos();
+        let sin_theta = theta.sin();
+        (
+            Vector3::new(phi.cos() * sin_theta, phi.sin() * sin_theta, theta.cos()),
+            0.25 * FRAC_1_PI,
+        )
+    }
+}
+
+pub struct UniformHemisphereSampler;
+
+impl UniformHemisphereSampler {
     pub fn sample(&self, input: &Point2<f32>, normal: &Vector3<f32>) -> (Vector3<f32>, f32) {
         let phi = input[0] * 2.0 * PI;
         let theta = input[1].acos();

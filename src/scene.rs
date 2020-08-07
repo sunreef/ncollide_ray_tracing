@@ -1,7 +1,7 @@
 use nalgebra::{Point3, Vector2, Vector3};
 use ncollide3d::{
     math::Isometry,
-    pipeline::object::{CollisionGroups, GeometricQueryType},
+    pipeline::object::{CollisionGroups, CollisionObjectSlabHandle, GeometricQueryType},
     world::CollisionWorld,
 };
 use serde::{Deserialize, Serialize};
@@ -12,6 +12,8 @@ use crate::object::{ObjectData, WorldObjectData};
 pub struct Scene {
     pub camera: Camera,
     pub collision_world: CollisionWorld<f32, WorldObjectData>,
+
+    emitters: Vec<CollisionObjectSlabHandle>,
 }
 
 impl Scene {
@@ -27,6 +29,7 @@ impl Scene {
                 .resolution(Vector2::new(800, 600))
                 .build(),
             collision_world: CollisionWorld::<f32, WorldObjectData>::new(0.0001f32),
+            emitters: Vec::new(),
         }
     }
 
@@ -40,13 +43,18 @@ impl Scene {
 
         match (position, shape) {
             (Some(pos), Some(s)) => {
-                self.collision_world.add(
+                let mut is_emitter = world_data.emission != None;
+
+                let (object_handle, _) = self.collision_world.add(
                     pos,
                     s.get_handle(),
                     CollisionGroups::new(),
                     GeometricQueryType::Contacts(0.0001, 0.0001),
                     world_data,
                 );
+                if is_emitter {
+                    self.emitters.push(object_handle);
+                }
             }
             _ => (),
         }

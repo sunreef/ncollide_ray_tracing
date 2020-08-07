@@ -60,9 +60,9 @@ impl PathTracingIntegrator {
 
             match emission {
                 Some((intensity, color)) => {
-                    if count_bounces > 0 {
-                        sample_value += *intensity * contribution.component_mul(&color.coords);
-                    }
+                    //if count_bounces > 0 {
+                    sample_value += *intensity * contribution.component_mul(&color.coords);
+                    //}
                 }
                 None => {}
             }
@@ -80,9 +80,13 @@ impl PathTracingIntegrator {
                         global_new_dir,
                     );
 
-                    let cos_theta = local_new_dir[2];
-                    contribution =
-                        contribution.component_mul(&bsdf_value) * cos_theta / bsdf_probability;
+                    if bsdf_function.is_diffuse() {
+                        let cos_theta = local_new_dir[2];
+                        contribution =
+                            contribution.component_mul(&bsdf_value) * cos_theta / bsdf_probability;
+                    } else {
+                        contribution = contribution.component_mul(&bsdf_value) / bsdf_probability;
+                    }
                     count_bounces += 1;
 
                     let roulette_sample = rng.gen_range(0.0, 1.0);

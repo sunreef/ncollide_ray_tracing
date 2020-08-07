@@ -8,7 +8,7 @@ use rand::Rng;
 use std::f32;
 use std::f32::consts::PI;
 
-use crate::sampler::{CosineWeightedHemisphereSampler, HemisphereSampler};
+use crate::sampler::UniformHemisphereSampler;
 use crate::scene::Scene;
 
 pub struct AOIntegrator {
@@ -41,7 +41,7 @@ impl AOIntegrator {
         }
 
         //let sampler = CosineWeightedHemisphereSampler;
-        let sampler = HemisphereSampler;
+        let sampler = UniformHemisphereSampler;
         let ray_samples = Point2::new(rng.gen_range(0.0, 1.0), rng.gen_range(0.0, 1.0));
         let new_ray_origin = ray.point_at(min_intersection.toi - 0.001);
         let (new_ray_direction, new_ray_probability) =

@@ -1,8 +1,6 @@
-use nalgebra::{Isometry3, Point3, Unit, Vector, Vector3};
-use ncollide3d::{bounding_volume, shape};
+use nalgebra::{Isometry3, Point3, Unit, Vector3};
+use ncollide3d::{bounding_volume, query, shape};
 use serde::{Deserialize, Serialize};
-
-use crate::object::shapes::ObjectToShape;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Metaball {
@@ -61,8 +59,14 @@ impl shape::Shape<f32> for Metaball {
     }
 }
 
-//impl ObjectToShape for Metaball {
-//type ShapeType = shape::Cuboid<f32>;
-
-//fn to_shape(self) -> Self::ShapeType {}
-//}
+impl query::RayCast<f32> for Metaball {
+    fn toi_and_normal_with_ray(
+        &self,
+        m: &Isometry3<f32>,
+        ray: &query::Ray<f32>,
+        max_toi: f32,
+        solid: bool,
+    ) -> Option<query::RayIntersection<f32>> {
+        None
+    }
+}
