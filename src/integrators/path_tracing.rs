@@ -51,6 +51,7 @@ impl PathTracingIntegrator {
         let bsdf = &min_data.bsdf;
         let normal = &min_intersection.normal;
 
+        // Emissive material contribution
         match emission {
             Some((intensity, color)) => {
                 sample_value += *intensity * *color;
@@ -58,6 +59,17 @@ impl PathTracingIntegrator {
             None => {}
         }
 
+        // Light sampling
+        let emitter_index = rng.gen_range(0, scene.emitters.len());
+        let emitter_handle = scene.emitters[emitter_index];
+
+        let emitter_shape = scene
+            .collision_world
+            .collision_object(emitter_handle)
+            .unwrap()
+            .shape();
+
+        // BSDF sampling
         match bsdf {
             Some(bsdf_function) => {
                 let roulette_sample = rng.gen_range(0.0, 1.0);

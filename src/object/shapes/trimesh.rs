@@ -9,20 +9,13 @@ use crate::object::shapes::ObjectToShape;
 
 #[derive(Serialize, Deserialize)]
 pub struct TriMesh {
-    obj_path: String,
+    vertices: Vec<Point3<f32>>,
+    indices: Vec<Point3<usize>>,
 }
 
 impl TriMesh {
     pub fn new(path: String) -> Self {
-        TriMesh { obj_path: path }
-    }
-}
-
-impl ObjectToShape for TriMesh {
-    type ShapeType = shape::TriMesh<f32>;
-
-    fn to_shape(self) -> Self::ShapeType {
-        let mesh = Obj::<SimplePolygon>::load(Path::new(&self.obj_path)).unwrap();
+        let mesh = Obj::<SimplePolygon>::load(Path::new(&path)).unwrap();
         let vertices = mesh
             .position
             .iter()
@@ -37,7 +30,14 @@ impl ObjectToShape for TriMesh {
                 }
             }
         }
+        TriMesh { vertices, indices }
+    }
+}
 
-        shape::TriMesh::new(vertices, indices, None)
+impl ObjectToShape for TriMesh {
+    type ShapeType = shape::TriMesh<f32>;
+
+    fn to_shape(self) -> Self::ShapeType {
+        shape::TriMesh::new(self.vertices, self.indices, None)
     }
 }

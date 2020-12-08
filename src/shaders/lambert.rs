@@ -1,7 +1,7 @@
 use nalgebra::{Point2, Vector3};
 use std::f32::consts::FRAC_1_PI;
 
-use crate::sampler::CosineWeightedHemisphereSampler;
+use crate::sampling::CosineWeightedHemisphereSampler;
 use crate::shaders::{BxDF, BRDF, BSDF};
 
 #[derive(Clone, Debug)]

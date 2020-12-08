@@ -8,7 +8,7 @@ use rayon::{iter::ParallelIterator, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::integrators::PathTracingIntegrator;
-use crate::sampler::UniformSampler2;
+use crate::sampling::UniformSampler2;
 use crate::scene::Scene;
 
 pub struct CameraBuilder {

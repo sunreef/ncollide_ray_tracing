@@ -1,9 +1,9 @@
-use nalgebra::{Point2, Point3};
+use nalgebra::{Point2, Vector3};
 use ncollide3d::shape;
 use serde::{Deserialize, Serialize};
 
 use crate::object::shapes::{ObjectToShape, SampleShape};
-use crate::sampler::UniformSphereSampler;
+use crate::sampling::UniformSphereSampler;
 
 #[derive(Serialize, Deserialize)]
 pub struct Ball {
@@ -25,9 +25,9 @@ impl ObjectToShape for Ball {
 }
 
 impl SampleShape for Ball {
-    fn sample(&self, samples: &Point2<f32>) -> Point3<f32> {
+    fn sample(&self, samples: &Point2<f32>) -> Vector3<f32> {
         let sphere_sampler = UniformSphereSampler;
         let (vector, probability) = sphere_sampler.sample(samples);
-        self.radius * Point3::from(vector)
+        self.radius * vector
     }
 }

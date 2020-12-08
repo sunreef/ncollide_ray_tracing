@@ -2,7 +2,7 @@ mod camera;
 mod integrators;
 mod math;
 mod object;
-mod sampler;
+mod sampling;
 mod scene;
 mod shaders;
 

@@ -8,7 +8,7 @@ use rand::Rng;
 use std::f32;
 use std::f32::consts::PI;
 
-use crate::sampler::UniformHemisphereSampler;
+use crate::sampling::UniformHemisphereSampler;
 use crate::scene::Scene;
 
 pub struct AOIntegrator {

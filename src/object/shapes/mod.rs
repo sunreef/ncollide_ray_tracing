@@ -8,7 +8,7 @@ pub trait ObjectToShape {
 }
 
 pub trait SampleShape {
-    fn sample(&self, samples: &Point2<f32>) -> Point3<f32>;
+    fn sample(&self, samples: &Point2<f32>) -> Vector3<f32>;
 }
 
 mod ball;

@@ -13,7 +13,7 @@ pub struct Scene {
     pub camera: Camera,
     pub collision_world: CollisionWorld<f32, WorldObjectData>,
 
-    emitters: Vec<CollisionObjectSlabHandle>,
+    pub emitters: Vec<CollisionObjectSlabHandle>,
 }
 
 impl Scene {
