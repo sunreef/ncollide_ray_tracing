@@ -1,4 +1,4 @@
-use nalgebra::{Isometry3, Point3};
+use nalgebra::{Isometry3, Point3, Vector3};
 use serde::{Deserialize, Serialize};
 
 use crate::object::shapes::Shape;
@@ -8,7 +8,7 @@ use crate::shaders::{Shader, BSDF};
 pub struct ObjectData {
     pub shape: Option<Shape>,
     pub position: Option<Isometry3<f32>>,
-    pub emission: Option<(f32, Point3<f32>)>,
+    pub emission: Option<(f32, Vector3<f32>)>,
     pub bsdf: Option<Shader>,
 }
 
@@ -26,6 +26,6 @@ impl ObjectData {
 
 #[derive(Default)]
 pub struct WorldObjectData {
-    pub emission: Option<(f32, Point3<f32>)>,
+    pub emission: Option<(f32, Vector3<f32>)>,
     pub bsdf: Option<Box<dyn BSDF>>,
 }

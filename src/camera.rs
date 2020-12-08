@@ -100,7 +100,7 @@ impl Camera {
                         let initial_ray = Ray::new(Point3::new(0.0, 0.0, 0.0), ray_direction)
                             .transform_by(&self.position);
                         let sample_value = integrator.launch_ray(&initial_ray, scene, &mut rng);
-                        row[y] = (row[y] * s as f32 + sample_value.coords) / (s + 1) as f32;
+                        row[y] = (row[y] * s as f32 + sample_value) / (s + 1) as f32;
                     }
                 }
                 row

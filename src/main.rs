@@ -65,7 +65,7 @@ fn add_lights(scene: &mut SceneData) {
     let sun_light_data = ObjectData {
         shape: Some(Shape::Cuboid(Vector3::new(0.3, 0.3, 0.05))),
         position: Some(Isometry::translation(0.0, 0.0, 2.0)),
-        emission: Some((100.0f32, Point3::new(1.0, 1.0, 1.0))),
+        emission: Some((100.0f32, Vector3::new(1.0, 1.0, 1.0))),
         ..Default::default()
     };
     scene.add_object(sun_light_data);
@@ -90,7 +90,7 @@ fn main() {
     add_objects_to_scene(&mut scene_data, obj_path);
     add_lights(&mut scene_data);
 
-    println!("{}", serde_json::to_string_pretty(&scene_data).expect(""));
+    //println!("{}", serde_json::to_string_pretty(&scene_data).expect(""));
 
     let mut scene = scene_data.to_scene();
 
