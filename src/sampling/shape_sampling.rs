@@ -1,5 +1,5 @@
 use nalgebra::{Point2, Point3, Vector2, Vector3};
-use ncollide3d::shape::{Ball, Cuboid, Shape};
+use ncollide3d::shape::{Ball, Cuboid, Shape, ShapeHandle};
 
 use std::f32::consts::{FRAC_1_PI, PI};
 
@@ -9,9 +9,12 @@ use crate::sampling::UniformSphereSampler;
 pub struct UniformShapeSampler;
 
 impl UniformShapeSampler {
-    pub fn sample(&self, shape: &Shape<f32>, samples: &Point2<f32>) -> (Point3<f32>, f32) {
+    pub fn sample(&self, shape: &ShapeHandle<f32>, samples: &Point2<f32>) -> (Point3<f32>, f32) {
         if shape.is_shape::<Ball<f32>>() {
             let sampler = UniformBallSampler::new(shape.as_shape::<Ball<f32>>().unwrap());
+            return sampler.sample(samples);
+        } else if shape.is_shape::<Cuboid<f32>>() {
+            let sampler = UniformCuboidSampler::new(shape.as_shape::<Cuboid<f32>>().unwrap());
             return sampler.sample(samples);
         } else {
             return (Point3::new(0.0, 0.0, 0.0), 1.0f32);
@@ -81,6 +84,33 @@ impl<'a> UniformCuboidSampler<'a> {
             modified_sample /= ratios[r_index];
         }
 
-        (Point3::new(0.0, 0.0, 0.0), 1.0f32)
+        let mut face_sign = 1.0f32;
+        if modified_sample < 0.5 {
+            modified_sample *= 2.0;
+        } else {
+            modified_sample = 2.0 * modified_sample - 1.0;
+            face_sign = -1.0f32;
+        }
+
+        let surface_point = match r_index {
+            0 => Point3::new(
+                face_sign * half_sizes[0],
+                (2.0 * modified_sample - 1.0) * half_sizes[1],
+                (2.0 * samples[1] - 1.0) * half_sizes[2],
+            ),
+            1 => Point3::new(
+                (2.0 * modified_sample - 1.0) * half_sizes[0],
+                face_sign * half_sizes[1],
+                (2.0 * samples[1] - 1.0) * half_sizes[2],
+            ),
+            2 => Point3::new(
+                (2.0 * modified_sample - 1.0) * half_sizes[0],
+                (2.0 * samples[1] - 1.0) * half_sizes[1],
+                face_sign * half_sizes[2],
+            ),
+            _ => Point3::new(0.0, 0.0, 0.0),
+        };
+
+        (surface_point, 1.0f32 / (2.0 * total_area))
     }
 }
