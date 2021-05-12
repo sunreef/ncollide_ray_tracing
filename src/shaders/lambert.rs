@@ -16,7 +16,7 @@ impl LambertBRDF {
 }
 
 impl BxDF for LambertBRDF {
-    fn eval(&self, _: &Vector3<f32>, _: &Vector3<f32>) -> Vector3<f32> {
+    fn eval(&self, v1: &Vector3<f32>, v2: &Vector3<f32>) -> Vector3<f32> {
         self.albedo * FRAC_1_PI
     }
 

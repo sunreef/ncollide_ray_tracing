@@ -7,7 +7,7 @@ pub trait Vector3ToBasis: Sized {
 impl Vector3ToBasis for Vector3<f32> {
     fn orthonormal_basis(&self) -> (Self, Self, Self) {
         let b3 = self.clone();
-        let cross_dir = if b3[0] < 0.5 {
+        let cross_dir = if b3[0].abs() < 0.5 {
             Vector3::new(1.0, 0.0, 0.0)
         } else {
             Vector3::new(0.0, 1.0, 0.0)

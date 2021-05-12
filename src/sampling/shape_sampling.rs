@@ -1,5 +1,8 @@
 use nalgebra::{Point2, Point3, Vector2, Vector3};
-use ncollide3d::shape::{Ball, Cuboid, Shape, ShapeHandle};
+use ncollide3d::{
+    math::Isometry,
+    shape::{Ball, Cuboid, Shape, ShapeHandle},
+};
 
 use std::f32::consts::{FRAC_1_PI, PI};
 
@@ -9,13 +12,20 @@ use crate::sampling::UniformSphereSampler;
 pub struct UniformShapeSampler;
 
 impl UniformShapeSampler {
-    pub fn sample(&self, shape: &ShapeHandle<f32>, samples: &Point2<f32>) -> (Point3<f32>, f32) {
+    pub fn sample(
+        &self,
+        shape: &ShapeHandle<f32>,
+        position: &Isometry<f32>,
+        samples: &Point2<f32>,
+    ) -> (Point3<f32>, f32) {
         if shape.is_shape::<Ball<f32>>() {
             let sampler = UniformBallSampler::new(shape.as_shape::<Ball<f32>>().unwrap());
-            return sampler.sample(samples);
+            let (pos, prob) = sampler.sample(samples);
+            return (position * pos, prob);
         } else if shape.is_shape::<Cuboid<f32>>() {
             let sampler = UniformCuboidSampler::new(shape.as_shape::<Cuboid<f32>>().unwrap());
-            return sampler.sample(samples);
+            let (pos, prob) = sampler.sample(samples);
+            return (position * pos, prob);
         } else {
             return (Point3::new(0.0, 0.0, 0.0), 1.0f32);
         }

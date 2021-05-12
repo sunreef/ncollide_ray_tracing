@@ -6,6 +6,9 @@ mod sampling;
 mod scene;
 mod shaders;
 
+use std::fs::File;
+use std::io::Write;
+
 use image::RgbImage;
 use nalgebra::{Point3, Vector2, Vector3};
 use ncollide3d::math::Isometry;
@@ -19,7 +22,6 @@ fn add_objects_to_scene(scene: &mut SceneData, obj_path: String) {
     let mirror_ball = ObjectData {
         shape: Some(Shape::Ball(0.5f32)),
         position: Some(Isometry::translation(0.0, 0.0, 0.0)),
-        //bsdf: Some(Shader::Lambert(Vector3::new(0.8, 0.8, 0.8))),
         bsdf: Some(Shader::Mirror),
         ..Default::default()
     };
@@ -65,7 +67,7 @@ fn add_lights(scene: &mut SceneData) {
     let sun_light_data = ObjectData {
         shape: Some(Shape::Cuboid(Vector3::new(0.3, 0.3, 0.05))),
         position: Some(Isometry::translation(0.0, 0.0, 2.0)),
-        emission: Some((100.0f32, Vector3::new(1.0, 1.0, 1.0))),
+        emission: Some((5.0f32, Vector3::new(1.0, 1.0, 1.0))),
         ..Default::default()
     };
     scene.add_object(sun_light_data);
@@ -91,11 +93,17 @@ fn main() {
     add_lights(&mut scene_data);
 
     //println!("{}", serde_json::to_string_pretty(&scene_data).expect(""));
+    let mut file = File::create("assets/sphere_scene.json").unwrap();
+    file.write_all(
+        serde_json::to_string_pretty(&scene_data)
+            .expect("")
+            .as_bytes(),
+    );
 
     let mut scene = scene_data.to_scene();
 
     scene.perform_collision_phase();
-    let samples = scene.capture(1000u32);
+    let samples = scene.capture(10u32);
 
     let mut image = RgbImage::new(samples.len() as u32, samples[0].len() as u32);
     let clamp = |x: f32| 1.0f32.min(0.0f32.max(x));

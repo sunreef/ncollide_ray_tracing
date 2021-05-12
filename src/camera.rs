@@ -79,7 +79,7 @@ impl Camera {
         let pixel_sampler = UniformSampler2::new(self.pixel_dimensions);
         let start_time = Instant::now();
         let samples = (0..self.resolution[0])
-            .into_par_iter()
+            //.into_par_iter()
             .map(|x| {
                 let mut rng = thread_rng();
                 let mut row: Vec<Point3<f32>> = Vec::new();
@@ -99,7 +99,8 @@ impl Camera {
                         let ray_direction = ray_target.coords.normalize();
                         let initial_ray = Ray::new(Point3::new(0.0, 0.0, 0.0), ray_direction)
                             .transform_by(&self.position);
-                        let sample_value = integrator.launch_ray(&initial_ray, scene, &mut rng);
+                        let sample_value =
+                            integrator.launch_ray(&initial_ray, scene, &mut rng, true);
                         row[y] = (row[y] * s as f32 + sample_value) / (s + 1) as f32;
                     }
                 }
